@@ -1,0 +1,403 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F&V Body Manager - 88kg Project</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#07111f;
+      --card:#101d33;
+      --card2:#142642;
+      --gold:#ffd166;
+      --green:#06d6a0;
+      --red:#ef476f;
+      --blue:#4cc9f0;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --line:rgba(255,255,255,.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(6,214,160,.25), transparent 30%),
+        radial-gradient(circle at top right, rgba(255,209,102,.25), transparent 25%),
+        linear-gradient(160deg,#050816,#0b172a 55%,#06131f);
+      color:var(--text);
+      min-height:100vh;
+      padding:18px;
+    }
+    .app{max-width:980px;margin:0 auto;}
+    .hero{
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:24px;
+      background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.03));
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      width:220px;height:220px;border-radius:50%;
+      background:rgba(255,209,102,.18);
+      right:-80px;top:-80px;
+    }
+    h1{margin:0;font-size:32px;letter-spacing:-1px}
+    .subtitle{color:var(--gold);font-weight:800;margin-top:6px}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+    .stat{
+      background:rgba(16,29,51,.82);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px;
+    }
+    .stat small{display:block;color:var(--muted);font-size:13px}
+    .stat strong{font-size:26px;display:block;margin-top:5px}
+    .progressBox{margin-top:18px}
+    .bar{height:22px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+    .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:99px;transition:.5s}
+    .section{margin-top:18px;background:rgba(16,29,51,.72);border:1px solid var(--line);border-radius:24px;padding:18px}
+    .section h2{margin:0 0 14px;font-size:20px}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+    input, textarea, select{
+      width:100%;padding:13px;border-radius:14px;border:1px solid var(--line);
+      background:#081425;color:var(--text);font-size:16px;
+    }
+    textarea{min-height:80px;resize:vertical}
+    .formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    button{
+      border:0;border-radius:16px;padding:14px 16px;font-weight:900;font-size:15px;
+      color:#081425;background:linear-gradient(135deg,var(--green),var(--gold));
+      cursor:pointer;
+    }
+    button.secondary{background:#172a46;color:var(--text);border:1px solid var(--line)}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    canvas{background:#081425;border-radius:18px;padding:12px;border:1px solid var(--line)}
+    .records{display:grid;gap:10px}
+    .record{
+      display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:8px;
+      background:#081425;border:1px solid var(--line);border-radius:16px;padding:12px;color:#e2e8f0;
+    }
+    .badgeRow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+    .badge{
+      text-align:center;padding:14px 8px;border-radius:18px;background:#081425;border:1px solid var(--line);
+      opacity:.45;
+    }
+    .badge.on{opacity:1;background:linear-gradient(135deg,rgba(6,214,160,.22),rgba(255,209,102,.16));}
+    .exerciseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .exercise{
+      background:#081425;border:1px solid var(--line);border-radius:20px;padding:14px;
+    }
+    .pose{
+      height:140px;border-radius:16px;background:linear-gradient(135deg,#123,#234);
+      display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:10px;
+    }
+    .exercise h3{margin:0 0 6px}
+    .exercise p{margin:4px 0;color:var(--muted);font-size:14px}
+    .preview{max-width:180px;border-radius:14px;margin-top:10px;border:1px solid var(--line)}
+    .coach{
+      font-size:18px;line-height:1.6;
+      background:linear-gradient(135deg,rgba(255,209,102,.14),rgba(6,214,160,.12));
+      border-radius:20px;padding:16px;border:1px solid var(--line);
+    }
+    @media(max-width:760px){
+      body{padding:12px}
+      .grid,.formgrid,.charts,.exerciseGrid,.badgeRow{grid-template-columns:1fr 1fr}
+      .record{grid-template-columns:1fr 1fr}
+      h1{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <h1>🏆 F&V Body Manager</h1>
+      <div class="subtitle">88kg PROJECT · 목표까지 가는 다이어트 대시보드</div>
+
+      <div class="grid">
+        <div class="stat"><small>현재 체중</small><strong id="currentWeight">-</strong></div>
+        <div class="stat"><small>총 감량</small><strong id="lostWeight">-</strong></div>
+        <div class="stat"><small>목표까지</small><strong id="remainWeight">-</strong></div>
+        <div class="stat"><small>달성률</small><strong id="progressText">-</strong></div>
+      </div>
+
+      <div class="progressBox">
+        <div class="bar"><div class="fill" id="progressFill"></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>⚙ 초기 목표 설정</h2>
+      <div class="formgrid">
+        <div><label>시작 체중 kg</label><input id="startWeight" type="number" step="0.1" value="113"></div>
+        <div><label>목표 체중 kg</label><input id="goalWeight" type="number" step="0.1" value="88"></div>
+        <div><label>키 cm</label><input id="heightCm" type="number" step="0.1" value="175"></div>
+      </div>
+      <div class="btnrow">
+        <button onclick="saveSettings()">목표 저장</button>
+        <button class="secondary" onclick="resetAll()">전체 초기화</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📸 사진 업로드 / 오늘 기록</h2>
+      <div class="formgrid">
+        <div><label>체중계 사진</label><input id="weightPhoto" type="file" accept="image/*" onchange="previewImage(event,'weightPreview')"><img id="weightPreview" class="preview" style="display:none"></div>
+        <div><label>혈압계 사진</label><input id="bpPhoto" type="file" accept="image/*" onchange="previewImage(event,'bpPreview')"><img id="bpPreview" class="preview" style="display:none"></div>
+        <div><label>날짜</label><input id="date" type="date"></div>
+      </div>
+
+      <div class="formgrid" style="margin-top:12px">
+        <div><label>체중 kg</label><input id="weight" type="number" step="0.1" placeholder="예: 108.2"></div>
+        <div><label>수축기 혈압</label><input id="sys" type="number" placeholder="예: 121"></div>
+        <div><label>이완기 혈압</label><input id="dia" type="number" placeholder="예: 79"></div>
+        <div><label>맥박</label><input id="pulse" type="number" placeholder="예: 72"></div>
+        <div><label>운동</label><select id="exercise"><option>걷기</option><option>골프</option><option>실내자전거</option><option>스쿼트</option><option>휴식</option></select></div>
+        <div><label>운동 시간 분</label><input id="minutes" type="number" placeholder="예: 60"></div>
+      </div>
+      <div style="margin-top:12px"><label>메모</label><textarea id="memo" placeholder="예: 공복체중, 컨디션 좋음, 음주 없음"></textarea></div>
+
+      <div class="btnrow">
+        <button onclick="saveRecord()">오늘 기록 저장</button>
+        <button class="secondary" onclick="fillSample()">샘플 기록 넣기</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🤖 AI 코치 느낌 분석</h2>
+      <div class="coach" id="coachText">기록을 저장하면 분석이 표시됩니다.</div>
+    </div>
+
+    <div class="section">
+      <h2>📈 그래프</h2>
+      <div class="charts">
+        <canvas id="weightChart"></canvas>
+        <canvas id="bpChart"></canvas>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🏅 업적 배지</h2>
+      <div class="badgeRow" id="badges"></div>
+    </div>
+
+    <div class="section">
+      <h2>🏋 다이어트 추천 운동</h2>
+      <div class="exerciseGrid">
+        <div class="exercise"><div class="pose">🚶</div><h3>빠르게 걷기</h3><p>30~60분</p><p>무릎 부담이 적고 시작하기 좋음</p></div>
+        <div class="exercise"><div class="pose">🚲</div><h3>실내 자전거</h3><p>20~40분</p><p>체중이 있을 때 관절 부담이 적음</p></div>
+        <div class="exercise"><div class="pose">🪑</div><h3>의자 스쿼트</h3><p>10~15회 × 3세트</p><p>하체 근육 유지용</p></div>
+        <div class="exercise"><div class="pose">🧱</div><h3>벽 푸쉬업</h3><p>10~20회 × 3세트</p><p>초급 상체 운동</p></div>
+        <div class="exercise"><div class="pose">🧘</div><h3>플랭크</h3><p>10~30초 × 3세트</p><p>허리 무리 없이 짧게 시작</p></div>
+        <div class="exercise"><div class="pose">⛳</div><h3>골프 연습</h3><p>60분</p><p>꾸준히 하면 활동량 유지에 도움</p></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📋 기록 목록</h2>
+      <div class="records" id="records"></div>
+    </div>
+  </div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem("dietRecords") || "[]");
+  let settings = JSON.parse(localStorage.getItem("dietSettings") || '{"start":113,"goal":88,"height":175}');
+  let weightChart, bpChart;
+
+  document.getElementById("date").valueAsDate = new Date();
+  document.getElementById("startWeight").value = settings.start;
+  document.getElementById("goalWeight").value = settings.goal;
+  document.getElementById("heightCm").value = settings.height;
+
+  function saveSettings(){
+    settings = {
+      start: Number(document.getElementById("startWeight").value),
+      goal: Number(document.getElementById("goalWeight").value),
+      height: Number(document.getElementById("heightCm").value)
+    };
+    localStorage.setItem("dietSettings", JSON.stringify(settings));
+    render();
+    alert("목표가 저장되었습니다.");
+  }
+
+  function previewImage(event, id){
+    const file = event.target.files[0];
+    if(!file) return;
+    const img = document.getElementById(id);
+    img.src = URL.createObjectURL(file);
+    img.style.display = "block";
+    alert("사진 업로드 완료. 다음 버전에서 OCR 자동 숫자 인식을 붙일 예정입니다. 지금은 숫자를 확인 후 직접 입력하세요.");
+  }
+
+  function saveRecord(){
+    const r = {
+      date: document.getElementById("date").value,
+      weight: Number(document.getElementById("weight").value),
+      sys: Number(document.getElementById("sys").value),
+      dia: Number(document.getElementById("dia").value),
+      pulse: Number(document.getElementById("pulse").value),
+      exercise: document.getElementById("exercise").value,
+      minutes: Number(document.getElementById("minutes").value),
+      memo: document.getElementById("memo").value
+    };
+    if(!r.date || !r.weight){
+      alert("날짜와 체중은 꼭 입력해 주세요.");
+      return;
+    }
+    records = records.filter(x => x.date !== r.date);
+    records.push(r);
+    records.sort((a,b)=> new Date(a.date)-new Date(b.date));
+    localStorage.setItem("dietRecords", JSON.stringify(records));
+    clearInputs();
+    render();
+    alert("기록 저장 완료!");
+  }
+
+  function clearInputs(){
+    ["weight","sys","dia","pulse","minutes","memo"].forEach(id=>document.getElementById(id).value="");
+  }
+
+  function fillSample(){
+    records = [
+      {date:"2026-06-20",weight:113,sys:134,dia:86,pulse:78,exercise:"걷기",minutes:30,memo:"시작"},
+      {date:"2026-06-22",weight:111.5,sys:128,dia:82,pulse:76,exercise:"골프",minutes:60,memo:"감량 시작"},
+      {date:"2026-06-24",weight:109.8,sys:124,dia:80,pulse:73,exercise:"걷기",minutes:40,memo:"좋음"},
+      {date:"2026-06-27",weight:108.2,sys:121,dia:79,pulse:72,exercise:"골프",minutes:60,memo:"108kg대 진입"}
+    ];
+    localStorage.setItem("dietRecords", JSON.stringify(records));
+    render();
+  }
+
+  function resetAll(){
+    if(confirm("모든 기록을 삭제할까요?")){
+      localStorage.removeItem("dietRecords");
+      records = [];
+      render();
+    }
+  }
+
+  function render(){
+    const latest = records[records.length-1];
+    const current = latest ? latest.weight : settings.start;
+    const totalNeed = settings.start - settings.goal;
+    const lost = settings.start - current;
+    const remain = current - settings.goal;
+    const progress = Math.max(0, Math.min(100, (lost / totalNeed) * 100));
+
+    document.getElementById("currentWeight").textContent = current.toFixed(1)+"kg";
+    document.getElementById("lostWeight").textContent = lost.toFixed(1)+"kg";
+    document.getElementById("remainWeight").textContent = remain.toFixed(1)+"kg";
+    document.getElementById("progressText").textContent = progress.toFixed(0)+"%";
+    document.getElementById("progressFill").style.width = progress+"%";
+
+    renderCoach();
+    renderBadges(current);
+    renderRecords();
+    renderCharts();
+  }
+
+  function renderCoach(){
+    const el = document.getElementById("coachText");
+    if(records.length < 2){
+      el.innerHTML = "기록이 2개 이상 쌓이면 체중 변화와 혈압 흐름을 분석합니다.";
+      return;
+    }
+    const last = records[records.length-1];
+    const prev = records[records.length-2];
+    const diff = last.weight - prev.weight;
+    const sign = diff < 0 ? "감량" : diff > 0 ? "증가" : "유지";
+    const bpMsg = last.sys && last.dia ? `오늘 혈압은 <b>${last.sys}/${last.dia}</b> 입니다.` : "오늘 혈압 기록은 없습니다.";
+    el.innerHTML = `
+      오늘 체중은 <b>${last.weight.toFixed(1)}kg</b>, 이전 기록 대비 <b>${Math.abs(diff).toFixed(1)}kg ${sign}</b>입니다.<br>
+      총 감량은 <b>${(settings.start-last.weight).toFixed(1)}kg</b>, 목표까지 <b>${(last.weight-settings.goal).toFixed(1)}kg</b> 남았습니다.<br>
+      ${bpMsg}<br>
+      ${diff < 0 ? "🔥 아주 좋습니다. 지금 흐름이면 다음 중간목표에 가까워지고 있습니다." : "괜찮습니다. 하루 변동보다 1주일 추세가 더 중요합니다."}
+    `;
+  }
+
+  function renderBadges(current){
+    const data = [
+      ["🥉","110kg",110],
+      ["🥈","105kg",105],
+      ["🥇","100kg",100],
+      ["💎","95kg",95],
+      ["👑","90kg",90],
+      ["🏆","88kg",88]
+    ];
+    document.getElementById("badges").innerHTML = data.map(b => `
+      <div class="badge ${current <= b[2] ? 'on' : ''}">
+        <div style="font-size:30px">${b[0]}</div>
+        <b>${b[1]}</b>
+      </div>
+    `).join("");
+  }
+
+  function renderRecords(){
+    const box = document.getElementById("records");
+    if(!records.length){
+      box.innerHTML = "<div style='color:#94a3b8'>아직 기록이 없습니다.</div>";
+      return;
+    }
+    box.innerHTML = records.slice().reverse().map(r => `
+      <div class="record">
+        <div><b>${r.date}</b></div>
+        <div>⚖️ ${r.weight || "-"}kg</div>
+        <div>❤️ ${r.sys || "-"}/${r.dia || "-"}</div>
+        <div>🏋 ${r.exercise || "-"} ${r.minutes ? r.minutes+"분" : ""}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderCharts(){
+    const labels = records.map(r=>r.date.slice(5));
+    const weights = records.map(r=>r.weight);
+    const goals = records.map(r=>settings.goal);
+    const sys = records.map(r=>r.sys || null);
+    const dia = records.map(r=>r.dia || null);
+
+    if(weightChart) weightChart.destroy();
+    if(bpChart) bpChart.destroy();
+
+    weightChart = new Chart(document.getElementById("weightChart"), {
+      type:"line",
+      data:{
+        labels,
+        datasets:[
+          {label:"체중", data:weights, tension:.35},
+          {label:"목표 88kg", data:goals, borderDash:[6,6], tension:.35}
+        ]
+      },
+      options:{
+        plugins:{legend:{labels:{color:"#fff"}}},
+        scales:{x:{ticks:{color:"#94a3b8"}},y:{ticks:{color:"#94a3b8"}}}
+      }
+    });
+
+    bpChart = new Chart(document.getElementById("bpChart"), {
+      type:"line",
+      data:{
+        labels,
+        datasets:[
+          {label:"수축기", data:sys, tension:.35},
+          {label:"이완기", data:dia, tension:.35}
+        ]
+      },
+      options:{
+        plugins:{legend:{labels:{color:"#fff"}}},
+        scales:{x:{ticks:{color:"#94a3b8"}},y:{ticks:{color:"#94a3b8"}}}
+      }
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>
+

@@ -385,7 +385,7 @@
   }
 
   function renderRecords(){
-    const box = document.getElementById("historyList9");
+    const box = document.getElementById("historyList");
     if(!records.length){
       box.innerHTML = "<div style='color:#94a3b8'>아직 기록이 없습니다.</div>";
       return;
@@ -454,11 +454,6 @@ function deleteRecord(index){
   }
 
   render();
-</script>
-  <script>
-let records = JSON.parse(localStorage.getItem("bodyRecords")) || [];
-
-document.addEventListener("DOMContentLoaded", renderHistory);
 </script>
 </body>
 </html>
